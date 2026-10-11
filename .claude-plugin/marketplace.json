@@ -1,0 +1,15 @@
+{
+  "name": "philip-relay",
+  "owner": {
+    "name": "Philip"
+  },
+  "description": "Portable workflow, memory, knowledge routing, and verification for coding agents.",
+  "plugins": [
+    {
+      "name": "philip",
+      "source": "./plugins/philip",
+      "description": "Portable workflow, memory, knowledge routing, and verification for coding agents.",
+      "version": "0.1.3"
+    }
+  ]
+}

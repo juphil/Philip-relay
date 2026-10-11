@@ -1,0 +1,10 @@
+{
+  "name": "philip",
+  "version": "0.1.3",
+  "description": "Portable workflow, memory, knowledge routing, and verification for coding agents.",
+  "author": {
+    "name": "Philip"
+  },
+  "repository": "https://github.com/juphil/Philip-relay",
+  "license": "Apache-2.0"
+}

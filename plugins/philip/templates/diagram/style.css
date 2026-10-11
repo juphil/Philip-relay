@@ -1,0 +1,150 @@
+:root{
+  --bg:#0e1116; --panel:#171c24; --panel2:#1d242e; --line:#2b3543;
+  --fg:#e6edf3; --dim:#9aa7b4; --muted:#6b7785;
+  --done:#3fb950; --done-bg:#0f2417;
+  --todo:#f85149; --todo-bg:#2a1012;
+  --field:#d29922; --field-bg:#2a2008;
+  --ext:#7d8590; --ext-bg:#1b2027;
+  --accent:#58a6ff; --accent-bg:#0f1e33;
+  --r:9px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);overflow:hidden;
+  font-family:"Pretendard","Segoe UI",system-ui,sans-serif;font-size:13px;line-height:1.4;
+  display:flex;flex-direction:column}
+
+header{flex:0 0 auto;padding:9px 16px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header h1{font-size:15px;margin:0;white-space:nowrap}
+header .sub{color:var(--dim);font-size:11px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--dim);white-space:nowrap}
+.dot{width:11px;height:11px;border-radius:3px;border:1px solid #0006}
+.toolbar{display:flex;gap:8px;margin-left:10px}
+.toolbar button{font:inherit;font-size:12px;cursor:pointer;border-radius:6px;padding:5px 14px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--fg);transition:.12s}
+.toolbar button:hover{border-color:var(--accent)}
+#btnEdit.on{background:var(--done-bg);border-color:var(--done);color:var(--done)}
+#btnReset{color:var(--dim);font-size:11px;padding:5px 10px;display:none}
+body.editing #btnReset{display:inline-block}
+
+.main{flex:1 1 auto;display:flex;min-height:0;overflow:hidden}
+.stages{flex:1 1 auto;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.stage{position:relative;overflow:hidden}
+.stage.top{flex:1 1 auto}
+.stage.detail{flex:0 0 auto;height:124px;border-top:2px dashed var(--line)}
+body.no-detail .stage.detail{display:none}
+.resizer{flex:0 0 7px;background:var(--line);cursor:row-resize;display:none;position:relative}
+body.editing .resizer{display:block}
+body.no-detail .resizer{display:none}
+.resizer:hover{background:var(--accent)}
+.stage .canvas{position:relative;margin:0;cursor:grab}
+.stitle{position:absolute;top:8px;left:14px;font-size:11px;letter-spacing:.06em;color:var(--muted);
+  text-transform:uppercase;z-index:2}
+body.editing .stage{outline:1px dashed var(--field);outline-offset:-3px}
+
+svg.edges{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+svg.edges>path{fill:none;stroke:var(--muted);stroke-width:1.6}
+svg.edges marker path{stroke:none}
+/* 간선 hover 잡는 투명 두꺼운 선 (보이진 않고 마우스만 받음) */
+svg.edges path.ehit{stroke:transparent;stroke-width:14;fill:none;pointer-events:stroke;cursor:help}
+body.editing svg.edges path.ehit{cursor:pointer}
+svg.edges path.sel{stroke:var(--field);stroke-width:2.6}
+svg.edges circle.port{fill:#0c1117;stroke:var(--field);stroke-width:1.4;pointer-events:all;cursor:pointer}
+svg.edges circle.port:hover{fill:var(--field)}
+svg.edges circle.port.cur{fill:var(--dim)}
+svg.edges circle.port.on{fill:var(--field)}
+svg.edges text.pbtn{fill:var(--field);font-size:11px;pointer-events:all;cursor:pointer;text-decoration:underline}
+/* 점선(미배선·회신)은 점선 자체가 도착 방향으로 흐름 */
+@keyframes march9{ to{ stroke-dashoffset:-9 } }
+@keyframes march11{ to{ stroke-dashoffset:-11 } }
+svg.edges path.todo{stroke:var(--todo);stroke-dasharray:5 4;animation:march9 .55s linear infinite}
+svg.edges path.back{stroke:var(--accent);stroke-dasharray:6 5;opacity:.85;animation:march11 .7s linear infinite}
+/* 실선은 위로 점 하나가 흐름 */
+@keyframes flowdash{ to{ stroke-dashoffset:-80 } }
+svg.edges path.flow{fill:none;stroke:#cfe5ff;stroke-width:2.8;stroke-linecap:round;
+  stroke-dasharray:3 77;animation:flowdash 1.4s linear infinite;pointer-events:none}
+svg.edges text{fill:var(--accent);font-size:10px;font-family:ui-monospace,Consolas,monospace;
+  paint-order:stroke;stroke:var(--bg);stroke-width:3px}
+svg.edges text.todo{fill:var(--todo)}
+
+.group{position:absolute;z-index:1;border:1px dashed var(--line);border-radius:14px;background:#ffffff12}
+.group > .gl{position:absolute;top:-9px;left:14px;font-size:11px;font-weight:600;color:var(--accent);
+  background:var(--bg);padding:0 8px;white-space:nowrap}
+.group.g-mgr{border-color:#2f4a6e;background:#2f4a6e38} .group.g-pool{border-color:#2f4a6e;background:#2f4a6e38}
+.group.g-core{border-color:var(--accent);background:#58a6ff24}
+.group.g-out{border-color:#3a5230;background:#3a523047} .group.g-store{border-color:#5a4a1e;background:#5a4a1e47}
+.group.g-field{border-color:#6b5414;background:#d2992218}
+.group.g-algo{border:2px solid rgba(139,127,214,.3);background:#8b7fd60d;z-index:0}
+.group.g-algo > .gl{color:#b3a8ff;font-size:12px}
+body.editing .group{cursor:grab} body.editing .group:active{cursor:grabbing}
+body.editing .group > .gl{cursor:grab}
+
+.node{position:absolute;z-index:3;background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--r);padding:7px 9px;overflow:visible;word-break:break-word;transition:border-color .1s,box-shadow .1s}
+.node:hover{border-color:var(--accent);box-shadow:0 4px 16px #0007}
+.node .cat{font-size:9px;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin-bottom:1px;padding-right:50px}
+.node .ttl{font-size:12.5px;font-weight:600;line-height:1.2}
+.node .sum{color:var(--dim);font-size:10px;margin-top:3px;line-height:1.3}
+.node .fl{color:var(--muted);font-size:9px;font-family:ui-monospace,Consolas,monospace;margin-top:2px;
+  line-height:1.3;overflow-wrap:anywhere}
+/* 배지: 노드 우상단 고정 */
+.node .bdg{position:absolute;top:5px;right:6px;font-size:8.5px;font-weight:700;padding:1px 6px;
+  border-radius:20px;border:1px solid #0006;white-space:nowrap}
+body.editing .node{cursor:grab}
+body.editing .node:active{cursor:grabbing}
+
+.s-done{border-left:3px solid var(--done)} .s-done .bdg{background:var(--done-bg);color:var(--done);border-color:var(--done)}
+.s-todo{border-left:3px solid var(--todo);border-style:dashed} .s-todo .bdg{background:var(--todo-bg);color:var(--todo);border-color:var(--todo)}
+.s-field{border-left:3px solid var(--field)} .s-field .bdg{background:var(--field-bg);color:var(--field);border-color:var(--field)}
+.s-ext{border-left:3px solid var(--ext);background:var(--ext-bg)} .s-ext .bdg{background:#21262d;color:var(--ext);border-color:var(--ext)}
+.s-core{border-left:3px solid var(--accent);background:var(--accent-bg)} .s-core .bdg{background:#0f1e33;color:var(--accent);border-color:var(--accent)}
+
+/* 강조(리스트 클릭) */
+.node.dim{opacity:.15;filter:saturate(.3)} .node.hi{box-shadow:0 0 0 2px var(--accent),0 6px 22px #0009}
+svg.edges path.edim{opacity:.05} svg.edges text.edim{opacity:.05}
+
+/* 우측 리스트 */
+.tlist{flex:0 0 268px;display:flex;flex-direction:column;background:var(--panel2);
+  border-left:1px solid var(--line);padding:0 10px 10px;overflow:auto}
+.tlist h5{position:sticky;top:0;z-index:1;background:var(--panel2);margin:0;padding:10px 0 7px;
+  font-size:11px;color:var(--dim);letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center}
+.tlist h5 button{font:inherit;font-size:10px;color:var(--dim);background:none;border:1px solid var(--line);
+  border-radius:5px;padding:2px 8px;cursor:pointer}
+.tlist h5 button:hover{border-color:var(--accent);color:var(--fg)}
+.tlist .ti{display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid var(--line);
+  border-radius:7px;margin:5px 0;cursor:pointer;transition:.1s}
+.tlist .ti:hover{border-color:var(--accent)} .tlist .ti.on{border-color:var(--accent);background:var(--accent-bg)}
+.tlist .ti.t-done{border-left:3px solid var(--done)} .tlist .ti.t-todo{border-left:3px solid var(--todo)}
+.tlist .ti .nm{font-family:ui-monospace,monospace;font-size:10.5px;color:var(--fg)}
+.tlist .ti .fnm{font-size:10px;color:var(--dim)}
+.tlist .ti .sb{margin-left:auto;font-size:9px;color:var(--muted);white-space:nowrap}
+.tlist .ti.t-warn{border-left:3px solid var(--field)}
+.tlist .ti.t-ext{border-left:3px solid var(--ext);opacity:.5;cursor:default}
+.tlist .gh{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:9px 0 1px;padding-left:2px}
+
+/* 호버 팝업: 가로 스크롤 없이 내용 폭에 맞춰 넓힘 */
+#tip{position:fixed;z-index:500;width:max-content;min-width:240px;max-width:min(560px,92vw);
+  background:var(--panel2);border:1px solid var(--accent);border-radius:var(--r);padding:11px 13px;
+  box-shadow:0 8px 30px #000b;display:none;max-height:82vh;overflow-x:hidden;overflow-y:auto}
+#tip h4{margin:0 0 6px;font-size:0.96em}
+#tip .file{color:var(--muted);font-size:0.77em;font-family:ui-monospace,Consolas,monospace;margin:0 0 7px}
+#tip ul{margin:0;padding-left:16px;color:var(--dim);font-size:0.88em} #tip ul li{margin:3px 0}
+#tip .msg{font-family:ui-monospace,monospace;color:var(--accent);font-size:0.85em}
+#tip .pill{font-size:0.77em;color:var(--muted);font-family:ui-monospace,monospace;background:#0c1117;
+  border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+#tip table{border-collapse:collapse;width:100%;font-size:0.77em;margin-top:5px}
+#tip th,#tip td{border:1px solid var(--line);padding:2px 5px;text-align:left}
+#tip th{background:#0c1117;color:var(--accent)} #tip td{color:var(--dim)}
+#tip td.k{color:var(--fg);font-family:ui-monospace,monospace;white-space:nowrap}
+#tip td.c{text-align:center} .car{color:var(--done);font-weight:700} .face{color:var(--muted)}
+#tip .path{font-family:ui-monospace,monospace;font-size:0.73em;color:var(--dim);background:#0c1117;
+  border:1px solid var(--line);border-radius:5px;padding:4px 6px;margin:3px 0;display:block;word-break:break-all}
+#tip .path b{color:var(--accent)}
+
+footer{flex:0 0 auto;padding:6px 16px;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--dim)}
+footer .pill{font-size:9.5px;color:var(--muted);font-family:ui-monospace,monospace;background:#0c1117;
+  border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+footer b{color:var(--fg)} footer .todo{color:var(--todo);font-weight:700}

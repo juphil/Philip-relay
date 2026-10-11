@@ -1,0 +1,18 @@
+{
+  "name": "philip",
+  "version": "0.1.3",
+  "description": "Portable workflow, memory, knowledge routing, and verification for coding agents.",
+  "author": {
+    "name": "Philip"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Philip Relay",
+    "shortDescription": "Carry project context safely between coding agents.",
+    "longDescription": "Philip Relay adds portable workflows for project setup, memory, verification, knowledge routing, UI review, and update governance.",
+    "developerName": "Philip",
+    "category": "Productivity",
+    "capabilities": ["skills", "hooks"],
+    "defaultPrompt": "Use Philip Relay to recover the project state and choose the smallest relevant workflow."
+  }
+}

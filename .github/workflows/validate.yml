@@ -1,0 +1,25 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Check generated files
+        run: python plugins/philip/tools/build_skills.py --check
+      - name: Run unit tests
+        run: python -m unittest discover -s plugins/philip/tools -p "test_*.py"
+      - name: Audit plugin release
+        run: python plugins/philip/tools/update_audit.py
+      - name: Check public boundary
+        run: python tools/public_release_check.py

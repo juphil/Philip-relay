@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- 프로젝트 구조도 (템플릿)
+     내용 수정 = data.js · 스타일 = style.css · 동작 = app.js
+     여는 법 = start.bat 더블클릭(배치 저장 가능) 또는 index.html 직접(보기만).
+     ★새 프로젝트 적용 시 바꿀 곳: <title>, <h1>, footer, 상세영역 제목(.stitle) -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>프로젝트 구조도</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>프로젝트 구조도</h1>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--done)"></i>구현·검증</span>
+    <span><i class="dot" style="background:var(--todo)"></i>미구현·미배선</span>
+    <span><i class="dot" style="background:var(--field)"></i>외부확정 대기·설정값</span>
+    <span><i class="dot" style="background:var(--ext)"></i>외부(범위 밖)</span>
+    <span><i class="dot" style="background:var(--accent)"></i>코어</span>
+  </div>
+  <div class="toolbar">
+    <button id="btnDetail" title="상세 확대 영역 접기/펴기">상세 접기</button>
+    <button id="btnSave" title="현재 배치를 data.js 에 직접 저장 (start.bat 로 열었을 때)">배치 저장</button>
+    <button id="btnExport" title="현재 배치를 파일로 내보내기 (백업용)">배치 내보내기</button>
+    <button id="btnReset" title="내 편집을 지우고 기본 배치로">원본 복원</button>
+    <button id="btnEdit">수정</button>
+  </div>
+</header>
+
+<div class="main">
+<div class="stages">
+  <div class="stage top">
+    <div class="canvas" id="cTop"><svg class="edges" id="eTop"></svg></div>
+  </div>
+  <div class="resizer" id="resizer" title="수정 모드: 위아래로 끌어 영역 비율 변경"></div>
+  <div class="stage detail">
+    <div class="stitle">상세 영역 (제목 교체)</div>
+    <div class="canvas" id="cDetail"><svg class="edges" id="eDetail"></svg></div>
+  </div>
+</div>
+<div class="tlist" id="tlist"></div>
+</div>
+
+<footer>
+  <span><b>핵심 설정:</b></span>
+  <span class="pill">설정값 pill 로 교체</span>
+  <span><b>외부 대기:</b> <span style="color:var(--field)">미확정 항목 나열</span></span>
+  <span class="todo" style="margin-left:auto">★ 남은 작업 한 줄 요약</span>
+</footer>
+
+<div id="tip"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

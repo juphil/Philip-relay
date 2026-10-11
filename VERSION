@@ -1,0 +1,4 @@
+v0.1.3 (2026-10-11) — safer memory selection and index preservation, complete bounded memory-link summaries, and a flexible deletion guard that allows exact user-approved permanent deletion while keeping broad roots protected
+v0.1.2 (2026-10-11) — avoid false rule-file conflict warnings when AGENTS.md and CLAUDE.md are byte-identical
+v0.1.1 (2026-10-11) — safety fixes, authenticated private-repository update checks, bounded session context, and privacy-history cleanup
+v0.1.0 (2026-10-11) — first public Philip Relay release

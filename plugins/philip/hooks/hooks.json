@@ -1,0 +1,57 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,runpy,sys;sys.argv=['philip','guard'];runpy.run_path(os.path.join(os.environ.get('PLUGIN_ROOT') or os.environ['CLAUDE_PLUGIN_ROOT'],'hooks','agent_hook.py'),run_name='__main__')\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell|shell|local_shell|exec_command|unified_exec",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,runpy,sys;sys.argv=['philip','deleteguard'];runpy.run_path(os.path.join(os.environ.get('PLUGIN_ROOT') or os.environ['CLAUDE_PLUGIN_ROOT'],'hooks','agent_hook.py'),run_name='__main__')\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,runpy,sys;sys.argv=['philip','session'];runpy.run_path(os.path.join(os.environ.get('PLUGIN_ROOT') or os.environ['CLAUDE_PLUGIN_ROOT'],'hooks','agent_hook.py'),run_name='__main__')\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,runpy,sys;sys.argv=['philip','reminder'];runpy.run_path(os.path.join(os.environ.get('PLUGIN_ROOT') or os.environ['CLAUDE_PLUGIN_ROOT'],'hooks','agent_hook.py'),run_name='__main__')\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import os,runpy,sys;sys.argv=['philip','rulesync'];runpy.run_path(os.path.join(os.environ.get('PLUGIN_ROOT') or os.environ['CLAUDE_PLUGIN_ROOT'],'hooks','agent_hook.py'),run_name='__main__')\""
+          }
+        ]
+      }
+    ]
+  }
+}

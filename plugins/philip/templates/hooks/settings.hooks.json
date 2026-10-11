@@ -1,0 +1,22 @@
+{
+  "_경고": "⛔구방식(플러그인 미사용) 전용. Philip Relay 플러그인이 설치된 프로젝트에 이 블록을 병합하면 .claude/hooks/*.py 사본이 없어 모든 Edit이 차단된다(실측) — 플러그인은 hooks/hooks.json으로 자동 배선하므로 settings.json 은 비워 둔다.",
+  "_설명": "(구방식) 프로젝트 .claude/settings.json에 병합할 hooks 블록. 경로는 $CLAUDE_PROJECT_DIR 절대경로 필수(상대경로는 셸 cwd가 바뀌면 훅이 못 찾고 모든 Edit를 막는 사고 — 실측). guard_assets.py의 보호 목록만 도메인에 맞게 수정.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_assets.py\"" }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start.py\"" }
+        ]
+      }
+    ]
+  }
+}
