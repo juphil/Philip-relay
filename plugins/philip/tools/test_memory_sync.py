@@ -1,8 +1,10 @@
 """Isolated CLI regression tests; no remote access."""
 import json
+import os
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import importlib.util
 from pathlib import Path
@@ -121,6 +123,38 @@ class MemoryTests(unittest.TestCase):
             result = subprocess.run(args + ['--gitpush'], capture_output=True)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('project/MEMORY.md', git('diff', '--cached', '--name-only'))
+
+    def test_same_size_same_mtime_change_is_committed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo, mem = root / 'repo', root / 'memory'
+            mem.mkdir()
+
+            def run(args, cwd=None):
+                result = subprocess.run(args, cwd=cwd, capture_output=True, text=True, encoding='utf-8')
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                return result.stdout.strip()
+
+            run(['git', 'init', '-q', str(repo)])
+            git = lambda *args: run(['git', *args], repo)
+            git('config', 'user.name', 'Test')
+            git('config', 'user.email', 'test@example.invalid')
+            (repo / 'README').write_text('seed', encoding='utf-8')
+            git('add', 'README')
+            git('commit', '-qm', 'seed')
+            (mem / 'MEMORY.md').write_text('A', encoding='utf-8')
+            args = [sys.executable, str(PLUGIN / 'tools/mem_sync.py'), 'push', '--repo', str(repo),
+                    '--slug', 'project', '--memdir', str(mem), '--apply']
+            run(args)
+            first = (mem / 'MEMORY.md').stat().st_mtime_ns
+            time.sleep(1.1)
+            (repo / 'project/unrelated.txt').write_text('draft', encoding='utf-8')
+            git('add', 'project/unrelated.txt')
+            (mem / 'MEMORY.md').write_text('B', encoding='utf-8')
+            os.utime(mem / 'MEMORY.md', ns=(first, first))
+            run(args)
+            self.assertEqual(git('show', 'HEAD:project/MEMORY.md'), 'B')
+            self.assertIn('unrelated.txt', git('diff', '--cached', '--name-only'))
 
     def test_two_collections_preview_and_preservation(self):
         with tempfile.TemporaryDirectory() as tmp:

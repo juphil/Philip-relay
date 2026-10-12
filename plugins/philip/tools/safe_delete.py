@@ -137,10 +137,10 @@ def _protected_permanent_root(path, root):
     protected = {Path(path.anchor).resolve(), Path.home().resolve()}
     if root:
         protected.add(Path(root).resolve())
-    return path in protected
+    return any(path == item or item.is_relative_to(path) for item in protected)
 
 
-def remove(paths, yes, only_quarantine, permanent=False, confirmed_by_user=False):
+def remove(paths, yes, only_quarantine, permanent=False, confirmed_by_user=False, root=None):
     if permanent and only_quarantine:
         print('--permanent 와 --quarantine 은 함께 사용할 수 없습니다.')
         return 2
@@ -154,7 +154,8 @@ def remove(paths, yes, only_quarantine, permanent=False, confirmed_by_user=False
         if not p.exists() and not p.is_symlink():
             print(f'  없음(건너뜀): {p}')
             continue
-        if permanent and _protected_permanent_root(p, project_root(p.parent)):
+        if permanent and any(_protected_permanent_root(p, candidate)
+                             for candidate in (root, project_root(p.parent))):
             print(f'광범위 루트는 영구 삭제할 수 없습니다: {p}')
             return 2
         size, count = tree_size(p)
@@ -162,7 +163,7 @@ def remove(paths, yes, only_quarantine, permanent=False, confirmed_by_user=False
     if not targets:
         print('옮길 대상이 없습니다.')
         return 1
-    root = project_root(targets[0][0].parent)
+    root = root or project_root(targets[0][0].parent)
     total = sum(s for _, s, _ in targets)
     print(f'대상 {len(targets)}개 · 파일 {sum(c for *_, c in targets)}개 · {total / 1e6:.1f}MB')
     for p, s, c in targets:
@@ -290,7 +291,7 @@ def main():
         ap.error('경로를 주세요.')
     if a.confirmed_by_user and not a.permanent:
         ap.error('--confirmed-by-user 는 --permanent 와 함께 사용합니다.')
-    return remove(a.paths, a.yes, a.quarantine, a.permanent, a.confirmed_by_user)
+    return remove(a.paths, a.yes, a.quarantine, a.permanent, a.confirmed_by_user, root=root)
 
 
 if __name__ == '__main__':

@@ -256,6 +256,10 @@ def _scan(command, reasons, depth=0, cwd=None):
                     reasons.append(f'git {sub} --orphan(작업 트리 이력 전환): {stmt[:120]}')
             elif sub == 'push' and re.search(r'(^|\s)(-f|--force)(?:=\S+)?(\s|$)', low):
                 reasons.append(f'git push --force(원격 이력 덮어쓰기): {stmt[:120]}')
+            elif (sub == 'push' and '--force-with-lease' not in low
+                  and any(len(arg) > 1 and arg.startswith('+') for arg in _without_redirections(git_args))):
+                # A positional +refspec has the same force-push effect. Keep the existing lease exception.
+                reasons.append(f'git push +refspec(원격 이력 덮어쓰기): {stmt[:120]}')
             elif sub == 'branch' and re.search(r'(^|\s)-D(\s|$)', ' '.join(git_args)):
                 if not temp_repo:
                     reasons.append(f'git branch -D(병합 안 된 브랜치 강제 삭제): {stmt[:120]}')

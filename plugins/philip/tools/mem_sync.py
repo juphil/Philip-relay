@@ -179,7 +179,8 @@ def cmd_push(a):
         c = sh(['git', 'commit', '--only', '-m', 'mem push %s @%s %s' %
                 (a.slug, mach, time.strftime('%Y-%m-%d %H:%M')), '--', *paths], a.repo)
         if c.returncode:
-            print('커밋 실패 — push 중단:', c.stderr.strip()); return 5
+            message = (c.stdout.strip() + '\n' + c.stderr.strip()).strip() or f'git 종료 코드 {c.returncode}'
+            print('커밋 실패 — push 중단:', message); return 5
         print('계획에 포함된 파일만 커밋했습니다.')
     else:
         print('파일 변경 없음. 요청된 원격 전송은 별도로 확인합니다.')
@@ -320,7 +321,10 @@ def index_drops(source, dest, changes):
 def apply_transfer(changes):
     for source, target, _ in changes:
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
+        # Preserve content and permissions, but not the source mtime. Copying the mtime can let
+        # Git's stat cache miss a same-size change during rapid consecutive syncs.
+        shutil.copyfile(source, target)
+        shutil.copymode(source, target)
         if source.read_bytes() != target.read_bytes():
             raise OSError(f'동기화 내용 검증 실패: {target}')
 

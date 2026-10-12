@@ -51,6 +51,11 @@ CASES = [
     (f'rsync -a --delete src/ {TMP}/mirror/', False), ('rsync -a src/ backup/', False),
     ('rsync -a --remove-source-files data/ backup/', True),
     ('truncate -s 0 MEMORY.md', True), (f'truncate -s 0 {TMP}/x.log', False),
+    ('git push origin +main', True), ('git push origin +HEAD:main', True),
+    ('git push -u origin +feature', True),
+    ('git push --force-with-lease origin +main', False),
+    ('git push origin main:main', False), ('git push origin HEAD', False),
+    ('git push origin v1.0.0', False),
 ]
 
 
@@ -128,6 +133,60 @@ class DeleteGuard(unittest.TestCase):
                                     capture_output=True, timeout=60)
             self.assertNotEqual(result.returncode, 0)
             self.assertTrue(proj.exists())
+
+    def test_permanent_delete_refuses_ancestors_of_protected_roots(self):
+        with tempfile.TemporaryDirectory() as d:
+            parent = Path(d) / 'workspace'
+            proj = parent / 'proj'
+            proj.mkdir(parents=True)
+            sentinel = parent / 'sentinel.txt'
+            sentinel.write_text('keep', encoding='utf-8')
+            env = dict(os.environ, CLAUDE_PROJECT_DIR=str(proj), PYTHONIOENCODING='utf-8')
+            result = subprocess.run([sys.executable, str(TOOL), str(parent), '--permanent',
+                                     '--confirmed-by-user', '--yes'], cwd=proj, env=env,
+                                    capture_output=True, timeout=60)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertTrue(sentinel.exists())
+        spec = importlib.util.spec_from_file_location('safe_delete_for_test', TOOL)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        home = Path.home().resolve()
+        self.assertTrue(module._protected_permanent_root(home.parent, None))
+        self.assertFalse(module._protected_permanent_root(home / 'philip-not-a-root-check', None))
+
+    def test_permanent_ancestor_refused_without_claude_project_dir(self):
+        env = {k: v for k, v in os.environ.items() if k != 'CLAUDE_PROJECT_DIR'}
+        env['PYTHONIOENCODING'] = 'utf-8'
+        with tempfile.TemporaryDirectory() as d:
+            parent = Path(d) / 'workspace'
+            proj = parent / 'proj'
+            proj.mkdir(parents=True)
+            subprocess.run(['git', 'init', '-q', str(proj)], check=True)
+            sentinel = parent / 'sentinel.txt'
+            sentinel.write_text('keep', encoding='utf-8')
+            result = subprocess.run([sys.executable, str(TOOL), str(parent), '--permanent',
+                                     '--confirmed-by-user', '--yes'], cwd=proj, env=env,
+                                    capture_output=True, timeout=60)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertTrue(sentinel.exists())
+
+            plain = Path(d) / 'plain'
+            (plain / 'proj').mkdir(parents=True)
+            keep = plain / 'keep.txt'
+            keep.write_text('keep', encoding='utf-8')
+            result = subprocess.run([sys.executable, str(TOOL), str(plain), '--permanent',
+                                     '--confirmed-by-user', '--yes', '--root', str(plain / 'proj')],
+                                    cwd=Path(d), env=env, capture_output=True, timeout=60)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertTrue(keep.exists())
+
+            target = proj / 'approved.txt'
+            target.write_text('remove me', encoding='utf-8')
+            result = subprocess.run([sys.executable, str(TOOL), str(target), '--permanent',
+                                     '--confirmed-by-user', '--yes'], cwd=proj, env=env,
+                                    capture_output=True, timeout=60)
+            self.assertEqual(result.returncode, 0)
+            self.assertFalse(target.exists())
 
 
 class RuleSync(unittest.TestCase):
